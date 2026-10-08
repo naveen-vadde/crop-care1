@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="page-header">
+  <h1><i class="fa fa-leaf me-2"></i>Disease Detection Result</h1>
+  <p>Analysis complete</p>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+      <div class="harvest-card">
+        <div class="text-center mb-3">
+          <div style="font-size:3.5rem;">🔬</div>
+          <h4 style="font-weight:700; color:#2d6a4f; margin-top:0.5rem;">Diagnosis & Treatment</h4>
+          {% if confidence is defined %}
+          <div style="margin-top:0.75rem;">
+            <span style="font-size:0.85rem; color:#636e72; font-weight:600;">Model Confidence</span>
+            <div style="background:#e9ecef; border-radius:50px; height:12px; margin:0.4rem auto; max-width:280px; overflow:hidden;">
+              <div style="height:100%; width:{{ confidence }}%; background: {% if confidence >= 80 %}#52b788{% elif confidence >= 50 %}#f4a261{% else %}#e63946{% endif %}; border-radius:50px; transition:width 0.6s ease;"></div>
+            </div>
+            <span style="font-size:1.1rem; font-weight:700; color:{% if confidence >= 80 %}#2d6a4f{% elif confidence >= 50 %}#e07b39{% else %}#e63946{% endif %};">{{ confidence }}%</span>
+          </div>
+          {% endif %}
+        </div>
+        <div data-translate style="background:#f8fdf9; border-left:4px solid #52b788; border-radius:8px; padding:1.25rem 1.5rem; color:#2d3436; line-height:1.8;">
+          {{ prediction }}
+        </div>
+        <div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
+          <a href="{{ url_for('disease_prediction') }}" class="btn-harvest" style="text-decoration:none;">
+            <i class="fa fa-rotate-left me-1"></i> Try Another
+          </a>
+          <a href="{{ url_for('disease_tracking') }}" style="text-decoration:none; padding:0.65rem 1.5rem; border-radius:8px; border:1.5px solid #52b788; color:#52b788; font-weight:600; background:transparent;">
+            <i class="fa fa-chart-line me-1"></i> Track Progress
+          </a>
+          <button onclick="translateToHindi(this)" style="padding:0.65rem 1.5rem;border-radius:8px;border:1.5px solid #f4a261;color:#f4a261;font-weight:600;background:transparent;cursor:pointer;">
+            <i class="fa fa-language me-1"></i> हिंदी में देखें
+          </button>
+          <a href="{{ url_for('home') }}" style="text-decoration:none; padding:0.65rem 1.5rem; border-radius:8px; border:1.5px solid #2d6a4f; color:#2d6a4f; font-weight:600;">
+            <i class="fa fa-home me-1"></i> Home
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

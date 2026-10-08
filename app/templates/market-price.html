@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="page-header">
+  <h1><i class="fa fa-chart-line me-2"></i>Market Price Insight</h1>
+  <p>Get AI-powered crop price trends, best selling seasons, and top markets</p>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="harvest-card">
+        <form action="{{ url_for('market_price_result') }}" method="POST">
+          <div class="mb-3">
+            <label class="form-label">Crop Name <span class="text-danger">*</span></label>
+            <input type="text" name="crop" class="form-control" placeholder="e.g. Wheat, Rice, Tomato" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">State / Region</label>
+            <input type="text" name="state" class="form-control" placeholder="e.g. Punjab, Maharashtra">
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Season</label>
+            <select name="season" class="form-select">
+              <option value="">-- Select Season --</option>
+              <option>Kharif (Jun–Oct)</option>
+              <option>Rabi (Nov–Apr)</option>
+              <option>Zaid (Mar–Jun)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-harvest w-100">
+            <i class="fa fa-search me-2"></i>Get Price Insight
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

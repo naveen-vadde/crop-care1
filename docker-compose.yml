@@ -1,0 +1,22 @@
+# CropCare web app. The database is MongoDB Atlas (cloud), so there is no
+# database container - the app reads MONGODB_URI from your .env file.
+#
+#   docker compose up -d --build
+#
+services:
+  web:
+    build: .
+    container_name: cropcare-app
+    env_file:
+      - .env
+    environment:
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      # Keep uploaded leaf photos across restarts
+      - cropcare-uploads:/app/static/uploads
+    restart: unless-stopped
+
+volumes:
+  cropcare-uploads:

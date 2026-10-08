@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="page-header">
+  <h1><i class="fa fa-calendar-alt me-2"></i>Smart Crop Planning</h1>
+  <p>Get a personalized seasonal crop plan with cost estimates and rotation advice</p>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="harvest-card">
+        <form action="{{ url_for('crop_planning_result') }}" method="POST">
+          <div class="row g-3">
+            <div class="col-sm-8">
+              <label class="form-label">Land Size <span class="text-danger">*</span></label>
+              <input type="number" name="land_size" class="form-control" placeholder="e.g. 2" min="0.1" step="0.1" required>
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">Unit</label>
+              <select name="land_unit" class="form-select">
+                <option value="acres">Acres</option>
+                <option value="hectares">Hectares</option>
+                <option value="bigha">Bigha</option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Budget (₹)</label>
+              <input type="number" name="budget" class="form-control" placeholder="e.g. 50000">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Season <span class="text-danger">*</span></label>
+              <select name="season" class="form-select" required>
+                <option value="">-- Select --</option>
+                <option>Kharif (Jun–Oct)</option>
+                <option>Rabi (Nov–Apr)</option>
+                <option>Zaid (Mar–Jun)</option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">State / Region</label>
+              <input type="text" name="state" class="form-control" placeholder="e.g. Uttar Pradesh">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Soil Type</label>
+              <select name="soil_type" class="form-select">
+                <option value="">-- Select --</option>
+                <option>Alluvial</option>
+                <option>Black (Regur)</option>
+                <option>Red & Yellow</option>
+                <option>Laterite</option>
+                <option>Sandy</option>
+                <option>Loamy</option>
+                <option>Clay</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Water Source</label>
+              <select name="water_source" class="form-select">
+                <option value="">-- Select --</option>
+                <option>Canal irrigation</option>
+                <option>Borewell / Tubewell</option>
+                <option>Rainwater only</option>
+                <option>River / Pond</option>
+                <option>Drip irrigation</option>
+              </select>
+            </div>
+            <div class="col-12 mt-2">
+              <button type="submit" class="btn-harvest w-100">
+                <i class="fa fa-magic me-2"></i>Generate Crop Plan
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

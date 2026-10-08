@@ -1,0 +1,23 @@
+# Secrets
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# Local data
+*.sqlite3
+app/instance/
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+*.log

@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="page-header">
+  <h1><i class="fa fa-flask me-2"></i>Fertilizer Recommendation</h1>
+  <p>Enter your soil nutrients and crop type to get the best fertilizer advice</p>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+      <div class="harvest-card">
+        <form method="POST" action="{{ url_for('fert_recommend') }}">
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Nitrogen (N)</label>
+              <input type="number" class="form-control" name="nitrogen" placeholder="e.g. 50" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Phosphorous (P)</label>
+              <input type="number" class="form-control" name="phosphorous" placeholder="e.g. 50" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Potassium (K)</label>
+              <input type="number" class="form-control" name="pottasium" placeholder="e.g. 50" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Crop you want to grow</label>
+              <select name="cropname" class="form-select" required>
+                <option value="" disabled selected>Select a crop</option>
+                <option>rice</option><option>maize</option><option>chickpea</option>
+                <option>kidneybeans</option><option>pigeonpeas</option><option>mothbeans</option>
+                <option>mungbean</option><option>blackgram</option><option>lentil</option>
+                <option>pomegranate</option><option>banana</option><option>mango</option>
+                <option>grapes</option><option>watermelon</option><option>muskmelon</option>
+                <option>apple</option><option>orange</option><option>papaya</option>
+                <option>coconut</option><option>cotton</option><option>jute</option>
+                <option>coffee</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4 text-center">
+            <button type="submit" class="btn-harvest">
+              <i class="fa fa-magnifying-glass me-2"></i>Get Recommendation
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,229 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="page-header">
+  <h1><i class="fa fa-chart-line me-2"></i>Disease Timeline Tracking</h1>
+  <p>Monitor disease progression over time with multiple observations</p>
+</div>
+
+<div class="container py-5">
+  <div class="row">
+    <!-- Left Column: Upload Form -->
+    <div class="col-lg-5 mb-4">
+      <div class="harvest-card">
+        <h4 style="color:#2d6a4f; font-weight:700; margin-bottom:1.5rem;">
+          <i class="fa fa-camera me-2"></i>Add New Observation
+        </h4>
+        
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('disease_tracking_upload') }}">
+          
+          <!-- Plant Selection or Creation -->
+          <div class="mb-3">
+            <label class="form-label" style="font-weight:600; color:#2d3436;">
+              <i class="fa fa-seedling me-1"></i>Select Plant
+            </label>
+            <select class="form-select" name="plant_selection" id="plant-select" onchange="togglePlantForm()">
+              <option value="new">➕ Track New Plant</option>
+              {% if plants %}
+                {% for plant in plants %}
+                <option value="{{ plant.plant_id }}">
+                  {{ plant.plant_name }} ({{ plant.crop_type }}) - {{ plant.total_records }} records
+                </option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </div>
+
+          <!-- New Plant Form (shown when "new" is selected) -->
+          <div id="new-plant-form">
+            <div class="mb-3">
+              <label class="form-label" style="font-weight:600; color:#2d3436;">Plant Name</label>
+              <input type="text" class="form-control" name="plant_name" placeholder="e.g., Tomato Plant #1">
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label" style="font-weight:600; color:#2d3436;">Crop Type</label>
+              <select class="form-select" name="crop_type">
+                <option value="">Select crop...</option>
+                <option value="Tomato">Tomato</option>
+                <option value="Potato">Potato</option>
+                <option value="Corn">Corn (Maize)</option>
+                <option value="Apple">Apple</option>
+                <option value="Grape">Grape</option>
+                <option value="Pepper">Pepper (Bell)</option>
+                <option value="Strawberry">Strawberry</option>
+                <option value="Cherry">Cherry</option>
+                <option value="Peach">Peach</option>
+                <option value="Orange">Orange</option>
+                <option value="Blueberry">Blueberry</option>
+                <option value="Raspberry">Raspberry</option>
+                <option value="Soybean">Soybean</option>
+                <option value="Squash">Squash</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label" style="font-weight:600; color:#2d3436;">Location (City)</label>
+              <input type="text" class="form-control" name="location" placeholder="e.g., Mumbai">
+            </div>
+          </div>
+
+          <!-- Observation Date -->
+          <div class="mb-3">
+            <label class="form-label" style="font-weight:600; color:#2d3436;">
+              <i class="fa fa-calendar me-1"></i>Observation Date
+            </label>
+            <input type="date" class="form-control" name="observation_date" required max="{{ today }}">
+            <small style="color:#636e72; font-size:0.8rem;">When was this photo taken?</small>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="mb-3">
+            <label class="form-label" style="font-weight:600; color:#2d3436;">
+              <i class="fa fa-image me-1"></i>Upload Leaf Image
+            </label>
+            <div id="drop-zone-tracking" style="
+              border: 2px dashed #52b788;
+              border-radius: 12px;
+              padding: 2rem;
+              text-align: center;
+              cursor: pointer;
+              background: #f8fdf9;
+            " onclick="document.getElementById('file-input-tracking').click()">
+              <div id="preview-wrap-tracking" style="display:none; margin-bottom:1rem;">
+                <img id="output-image-tracking" style="max-height:180px; border-radius:10px; max-width:100%;" alt="Preview">
+              </div>
+              <div id="upload-prompt-tracking">
+                <div style="font-size:2rem;">📷</div>
+                <p style="margin:0.5rem 0 0; color:#636e72; font-size:0.9rem;">Click to upload</p>
+              </div>
+              <input type="file" id="file-input-tracking" name="file" accept="image/*" style="display:none" onchange="previewImageTracking(event)" required>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-3">
+            <label class="form-label" style="font-weight:600; color:#2d3436;">
+              <i class="fa fa-note-sticky me-1"></i>Notes (Optional)
+            </label>
+            <textarea class="form-control" name="notes" rows="2" placeholder="Any observations or treatments applied..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-harvest w-100">
+            <i class="fa fa-upload me-2"></i>Upload & Analyze
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Tracked Plants List -->
+    <div class="col-lg-7">
+      <div class="harvest-card">
+        <h4 style="color:#2d6a4f; font-weight:700; margin-bottom:1.5rem;">
+          <i class="fa fa-list me-2"></i>Your Tracked Plants
+        </h4>
+        
+        {% if plants %}
+          <div class="row">
+            {% for plant in plants %}
+            <div class="col-md-6 mb-3">
+              <div style="border:1.5px solid #d8f3dc; border-radius:10px; padding:1rem; background:#f8fdf9;">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <h6 style="color:#2d6a4f; font-weight:700; margin:0;">{{ plant.plant_name }}</h6>
+                    <small style="color:#636e72;">{{ plant.crop_type }}</small>
+                  </div>
+                  <span style="background:#52b788; color:white; padding:0.2rem 0.6rem; border-radius:20px; font-size:0.75rem; font-weight:600;">
+                    {{ plant.total_records }} records
+                  </span>
+                </div>
+                <div style="font-size:0.8rem; color:#636e72; margin-bottom:0.75rem;">
+                  <i class="fa fa-location-dot me-1"></i>{{ plant.location or 'Not specified' }}
+                </div>
+                <div class="d-flex gap-2">
+                  <a href="{{ url_for('disease_tracking_view', plant_id=plant.plant_id) }}" class="btn btn-sm" style="background:#52b788; color:white; font-weight:600; flex:1;">
+                    <i class="fa fa-chart-line me-1"></i>View Timeline
+                  </a>
+                  <button onclick="confirmDeletePlantFromList('{{ plant.plant_id }}', '{{ plant.plant_name }}')" class="btn btn-sm" style="background:#e63946; color:white; font-weight:600;">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-5" style="color:#b2bec3;">
+            <div style="font-size:3rem;">🌱</div>
+            <p style="margin-top:1rem;">No plants tracked yet. Start by uploading your first observation!</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function previewImageTracking(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function() {
+      document.getElementById('output-image-tracking').src = reader.result;
+      document.getElementById('preview-wrap-tracking').style.display = 'block';
+      document.getElementById('upload-prompt-tracking').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function togglePlantForm() {
+    const select = document.getElementById('plant-select');
+    const form = document.getElementById('new-plant-form');
+    if (select.value === 'new') {
+      form.style.display = 'block';
+      // Make fields required
+      form.querySelectorAll('input, select').forEach(el => {
+        if (el.name !== 'location') el.required = true;
+      });
+    } else {
+      form.style.display = 'none';
+      // Remove required
+      form.querySelectorAll('input, select').forEach(el => el.required = false);
+    }
+  }
+
+  // Initialize on page load
+  togglePlantForm();
+
+  // Set default date to today
+  const dateInput = document.querySelector('input[name="observation_date"]');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+  }
+
+  function confirmDeletePlantFromList(plantId, plantName) {
+    if (confirm(`⚠️ Delete "${plantName}" and ALL its observations?\n\nThis will permanently delete all records and images.\n\nThis action CANNOT be undone!`)) {
+      fetch(`/disease-tracking/delete-plant/${plantId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Plant deleted successfully!');
+          location.reload();
+        } else {
+          alert('Error deleting plant: ' + data.message);
+        }
+      })
+      .catch(error => {
+        alert('Error deleting plant: ' + error);
+      });
+    }
+  }
+</script>
+
+{% endblock %}

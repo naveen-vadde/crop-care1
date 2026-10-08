@@ -1,0 +1,73 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="page-header">
+  <h1><i class="fa fa-chart-line me-2"></i>Market Price Insight</h1>
+  <p>{{ crop }}{% if state %} &mdash; {{ state }}{% endif %}{% if season %} &mdash; {{ season }}{% endif %}</p>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center g-4">
+
+    <!-- Main insight card -->
+    <div class="col-lg-8">
+      <div class="harvest-card">
+        <div class="d-flex align-items-center mb-4 gap-3">
+          <div style="width:52px;height:52px;background:#d8f3dc;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📈</div>
+          <div>
+            <h4 class="mb-0" style="color:#2d6a4f;font-weight:700;">{{ crop }} Price Report</h4>
+            <small class="text-muted">AI analysis grounded with live web search</small>
+          </div>
+        </div>
+
+        <!-- Vision image -->
+        {% if vision_image_url %}
+        <div class="mb-4">
+          <img src="{{ vision_image_url }}" alt="Relevant crop image"
+               style="width:100%;max-height:260px;object-fit:cover;border-radius:12px;">
+          {% if vision_caption %}
+          <p class="text-muted mt-2" style="font-size:0.85rem;font-style:italic;">
+            <i class="fa fa-eye me-1"></i>{{ vision_caption }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div data-translate class="result-content" style="line-height:1.8;">{{ insight }}</div>
+
+        <hr class="my-4">
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn-harvest" onclick="translateToHindi(this)">
+            <i class="fa fa-language me-1"></i> हिंदी में देखें
+          </button>
+          <a href="{{ url_for('market_price') }}" class="btn btn-outline-secondary" style="border-radius:8px;padding:0.65rem 1.5rem;">
+            <i class="fa fa-arrow-left me-1"></i> New Search
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sources sidebar -->
+    {% if sources %}
+    <div class="col-lg-4">
+      <div class="harvest-card h-100">
+        <h6 style="color:#2d6a4f;font-weight:700;margin-bottom:1rem;">
+          <i class="fa fa-search me-2"></i>Live Web Sources
+        </h6>
+        <div style="font-size:0.85rem;">
+          {% for s in sources %}
+          <div class="mb-3 pb-3" style="border-bottom:1px solid #f0f0f0;">
+            <a href="{{ s.url }}" target="_blank" rel="noopener"
+               style="color:#2d6a4f;font-weight:600;text-decoration:none;line-height:1.4;display:block;">
+              {{ s.title[:80] }}{% if s.title|length > 80 %}…{% endif %}
+            </a>
+            <small class="text-muted">{{ s.url[:50] }}…</small>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

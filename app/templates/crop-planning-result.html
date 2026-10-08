@@ -1,0 +1,129 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="page-header">
+  <h1><i class="fa fa-calendar-alt me-2"></i>Your Crop Plan</h1>
+  <p>{{ land_size }} {{ land_unit }}{% if state %} &mdash; {{ state }}{% endif %} &mdash; {{ season }}</p>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+
+    <!-- Main plan card -->
+    <div class="col-lg-8">
+      <div class="harvest-card">
+        <div class="d-flex align-items-center mb-4 gap-3">
+          <div style="width:52px;height:52px;background:#d8f3dc;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🗓️</div>
+          <div>
+            <h4 class="mb-0" style="color:#2d6a4f;font-weight:700;">Seasonal Crop Plan</h4>
+            <small class="text-muted">AI-generated plan grounded with live web search</small>
+          </div>
+        </div>
+
+        <!-- Vision image -->
+        {% if vision_image_url %}
+        <div class="mb-4">
+          <img src="{{ vision_image_url }}" alt="Relevant farming image"
+               style="width:100%;max-height:240px;object-fit:cover;border-radius:12px;">
+          {% if vision_caption %}
+          <p class="text-muted mt-2" style="font-size:0.85rem;font-style:italic;">
+            <i class="fa fa-eye me-1"></i>{{ vision_caption }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Charts -->
+        {% if chart_calendar %}
+        <div class="mb-4">
+          <h6 style="color:#2d6a4f;font-weight:700;margin-bottom:0.75rem;">
+            <i class="fa fa-calendar me-2"></i>Monthly Activity Calendar
+          </h6>
+          <img src="data:image/png;base64,{{ chart_calendar }}" alt="Monthly Calendar"
+               style="width:100%;border-radius:10px;border:1px solid #e8f5e9;">
+        </div>
+        {% endif %}
+
+        {% if chart_cost_revenue %}
+        <div class="mb-4">
+          <h6 style="color:#2d6a4f;font-weight:700;margin-bottom:0.75rem;">
+            <i class="fa fa-coins me-2"></i>Cost vs Revenue Estimate
+          </h6>
+          <img src="data:image/png;base64,{{ chart_cost_revenue }}" alt="Cost vs Revenue"
+               style="max-width:420px;width:100%;border-radius:10px;border:1px solid #e8f5e9;">
+        </div>
+        {% endif %}
+
+        <!-- Plan text -->
+        <div id="plan-content" data-translate class="result-content" style="line-height:1.8;">{{ plan }}</div>
+
+        <hr class="my-4">
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn-harvest" onclick="translateToHindi(this)">
+            <i class="fa fa-language me-1"></i> हिंदी में देखें
+          </button>
+          <button class="btn-harvest" style="background:#f4a261;" onclick="downloadPDF()">
+            <i class="fa fa-file-pdf me-1"></i> Download PDF
+          </button>
+          <a href="{{ url_for('crop_planning') }}" class="btn btn-outline-secondary" style="border-radius:8px;padding:0.65rem 1.5rem;">
+            <i class="fa fa-arrow-left me-1"></i> New Plan
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar: sources -->
+    <div class="col-lg-4">
+      {% if sources %}
+      <div class="harvest-card mb-4">
+        <h6 style="color:#2d6a4f;font-weight:700;margin-bottom:1rem;">
+          <i class="fa fa-search me-2"></i>Live Web Sources
+        </h6>
+        <div style="font-size:0.85rem;">
+          {% for s in sources %}
+          <div class="mb-3 pb-3" style="border-bottom:1px solid #f0f0f0;">
+            <a href="{{ s.url }}" target="_blank" rel="noopener"
+               style="color:#2d6a4f;font-weight:600;text-decoration:none;line-height:1.4;display:block;">
+              {{ s.title[:80] }}{% if s.title|length > 80 %}…{% endif %}
+            </a>
+            <small class="text-muted">{{ s.url[:50] }}…</small>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Quick tips card -->
+      <div class="harvest-card">
+        <h6 style="color:#2d6a4f;font-weight:700;margin-bottom:1rem;">
+          <i class="fa fa-lightbulb me-2"></i>Plan Summary
+        </h6>
+        <div style="font-size:0.88rem;color:#636e72;line-height:1.7;">
+          <div class="mb-2"><i class="fa fa-map-marker-alt me-2" style="color:#52b788;"></i>{{ state if state else 'India' }}</div>
+          <div class="mb-2"><i class="fa fa-sun me-2" style="color:#f4a261;"></i>{{ season }}</div>
+          <div class="mb-2"><i class="fa fa-ruler me-2" style="color:#52b788;"></i>{{ land_size }} {{ land_unit }}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Hidden PDF form -->
+<form id="pdf-form" action="{{ url_for('crop_planning_pdf') }}" method="POST" style="display:none;">
+  <input type="hidden" name="plan_html" id="pdf-plan-html">
+  <input type="hidden" name="chart_cost_revenue" value="{{ chart_cost_revenue or '' }}">
+  <input type="hidden" name="chart_calendar" value="{{ chart_calendar or '' }}">
+  <input type="hidden" name="land_size" value="{{ land_size }}">
+  <input type="hidden" name="land_unit" value="{{ land_unit }}">
+  <input type="hidden" name="state" value="{{ state }}">
+  <input type="hidden" name="season" value="{{ season }}">
+</form>
+
+<script>
+function downloadPDF() {
+  document.getElementById('pdf-plan-html').value =
+    document.getElementById('plan-content').innerHTML;
+  document.getElementById('pdf-form').submit();
+}
+</script>
+{% endblock %}

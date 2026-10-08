@@ -1,0 +1,31 @@
+# Render blueprint: web service. Database = MongoDB Atlas (set MONGODB_URI in the dashboard).
+services:
+  - type: web
+    name: cropcare
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        value: cropcare
+      - key: WEATHER_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: true
+# NOTES
+# * In Atlas -> Network Access, allow 0.0.0.0/0 (Render's outgoing IPs are not fixed).
+# * Uploaded photos live on the service disk, which is ephemeral on the free plan.
+#   Add a persistent disk mounted at /app/static/uploads to keep them.

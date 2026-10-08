@@ -1,0 +1,201 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="page-header">
+  <h1><i class="fa fa-chart-line me-2"></i>{{ plant.plant_name }} - Disease Timeline</h1>
+  <p>{{ plant.crop_type }} | {{ plant.location or 'Location not specified' }}</p>
+</div>
+
+<div class="container py-5">
+  
+  <!-- Progression Analysis Alert -->
+  {% if analysis %}
+  <div class="alert alert-{{ 'success' if analysis.alert_level == 'good' else 'danger' if analysis.alert_level == 'critical' else 'warning' if analysis.alert_level == 'warning' else 'info' }}" style="border-radius:10px; border-left:4px solid;">
+    <div class="d-flex align-items-center">
+      <div style="font-size:2rem; margin-right:1rem;">
+        {% if analysis.alert_level == 'good' %}✅
+        {% elif analysis.alert_level == 'critical' %}🚨
+        {% elif analysis.alert_level == 'warning' %}⚠️
+        {% else %}ℹ️{% endif %}
+      </div>
+      <div>
+        <h5 style="margin:0; font-weight:700;">
+          Trend: {{ analysis.trend|title }}
+          {% if analysis.rate_of_change != 0 %}
+            ({{ "+" if analysis.rate_of_change > 0 else "" }}{{ analysis.rate_of_change }} pts/day)
+          {% endif %}
+        </h5>
+        <p style="margin:0.25rem 0 0;">{{ analysis.message }}</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Charts Row -->
+  <div class="row mb-4">
+    <!-- Severity Timeline Chart -->
+    <div class="col-lg-6 mb-4">
+      <div class="harvest-card">
+        <h5 style="color:#2d6a4f; font-weight:700; margin-bottom:1rem;">
+          <i class="fa fa-chart-area me-2"></i>Severity Over Time
+        </h5>
+        {% if chart_severity %}
+        <img src="data:image/png;base64,{{ chart_severity }}" style="width:100%; border-radius:8px;" alt="Severity Chart">
+        {% else %}
+        <p class="text-muted">Not enough data to generate chart</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Confidence Timeline Chart -->
+    <div class="col-lg-6 mb-4">
+      <div class="harvest-card">
+        <h5 style="color:#2d6a4f; font-weight:700; margin-bottom:1rem;">
+          <i class="fa fa-chart-line me-2"></i>Detection Confidence
+        </h5>
+        {% if chart_confidence %}
+        <img src="data:image/png;base64,{{ chart_confidence }}" style="width:100%; border-radius:8px;" alt="Confidence Chart">
+        {% else %}
+        <p class="text-muted">Not enough data to generate chart</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Records Timeline -->
+  <div class="harvest-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 style="color:#2d6a4f; font-weight:700; margin:0;">
+        <i class="fa fa-clock-rotate-left me-2"></i>Observation History ({{ records|length }})
+      </h5>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('disease_tracking') }}" class="btn btn-sm" style="background:#52b788; color:white; font-weight:600;">
+          <i class="fa fa-plus me-1"></i>Add New
+        </a>
+        <button onclick="confirmDeletePlant('{{ plant.plant_id }}', '{{ plant.plant_name }}')" class="btn btn-sm" style="background:#e63946; color:white; font-weight:600;">
+          <i class="fa fa-trash me-1"></i>Delete Plant
+        </button>
+      </div>
+    </div>
+
+    {% if records %}
+    <div class="timeline">
+      {% for record in records %}
+      <div class="timeline-item" style="border-left:3px solid {{ record.severity_color }}; padding-left:1.5rem; margin-bottom:2rem; position:relative;">
+        <div style="position:absolute; left:-8px; top:0; width:14px; height:14px; border-radius:50%; background:{{ record.severity_color }}; border:2px solid white;"></div>
+        
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <h6 style="color:#2d6a4f; font-weight:700; margin:0;">
+              {{ record.disease_class.replace('___', ' - ').replace('_', ' ') }}
+            </h6>
+            <small style="color:#636e72;">
+              <i class="fa fa-calendar me-1"></i>{{ record.formatted_date }}
+            </small>
+          </div>
+          <div class="text-end">
+            <div style="font-size:0.75rem; color:#636e72; font-weight:600;">SEVERITY</div>
+            <div style="font-size:1.5rem; font-weight:700; color:{{ record.severity_color }};">
+              {{ record.severity_score }}
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <div style="background:#f8fdf9; padding:0.5rem; border-radius:6px; text-align:center;">
+              <div style="font-size:0.7rem; color:#636e72; font-weight:600;">CONFIDENCE</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#2d6a4f;">{{ record.confidence }}%</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div style="background:#f8fdf9; padding:0.5rem; border-radius:6px; text-align:center;">
+              <div style="font-size:0.7rem; color:#636e72; font-weight:600;">AFFECTED AREA</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#e76f51;">{{ record.affected_area_pct }}%</div>
+            </div>
+          </div>
+        </div>
+
+        {% if record.notes %}
+        <div style="background:#fff9e6; border-left:3px solid #f4a261; padding:0.75rem; border-radius:6px; font-size:0.9rem; color:#2d3436;">
+          <i class="fa fa-note-sticky me-1"></i>{{ record.notes }}
+        </div>
+        {% endif %}
+
+        <div style="margin-top:0.75rem;">
+          <a href="/static/uploads/{{ record.image_filename }}" target="_blank" style="color:#52b788; text-decoration:none; font-size:0.85rem; font-weight:600;">
+            <i class="fa fa-image me-1"></i>View Image
+          </a>
+          <button onclick="confirmDeleteRecord('{{ record.id }}', '{{ record.formatted_date }}')" style="color:#e63946; background:none; border:none; font-size:0.85rem; font-weight:600; cursor:pointer; margin-left:1rem;">
+            <i class="fa fa-trash me-1"></i>Delete
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-4" style="color:#b2bec3;">
+      <p>No observations recorded yet.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="text-center mt-4">
+    <a href="{{ url_for('disease_tracking') }}" class="btn-harvest" style="text-decoration:none;">
+      <i class="fa fa-arrow-left me-2"></i>Back to Tracking
+    </a>
+  </div>
+</div>
+
+<script>
+function confirmDeleteRecord(recordId, date) {
+  if (confirm(`Are you sure you want to delete the observation from ${date}?\n\nThis action cannot be undone.`)) {
+    fetch(`/disease-tracking/delete-record/${recordId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Record deleted successfully!');
+        location.reload();
+      } else {
+        alert('Error deleting record: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error deleting record: ' + error);
+    });
+  }
+}
+
+function confirmDeletePlant(plantId, plantName) {
+  if (confirm(`⚠️ WARNING: Delete "${plantName}" and ALL its observations?\n\nThis will permanently delete:\n- All observation records\n- All uploaded images\n- All progression data\n\nThis action CANNOT be undone!`)) {
+    if (confirm(`Are you absolutely sure? Type the plant name to confirm:\n\nExpected: ${plantName}`)) {
+      fetch(`/disease-tracking/delete-plant/${plantId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Plant deleted successfully!');
+          window.location.href = '/disease-tracking';
+        } else {
+          alert('Error deleting plant: ' + data.message);
+        }
+      })
+      .catch(error => {
+        alert('Error deleting plant: ' + error);
+      });
+    }
+  }
+}
+</script>
+
+{% endblock %}
